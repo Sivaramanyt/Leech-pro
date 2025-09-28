@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Direct environment variable loading - NO config file dependencies
+# Memory session fix - NO database conflicts
 
 from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
 from aioshutil import rmtree as aiormtree
@@ -75,14 +75,15 @@ if not TELEGRAM_HASH:
     LOGGER.error("TELEGRAM_HASH not found in environment variables!")
     exit(1)
 
-# Bot client instance
+# Bot client instance - MEMORY SESSION FIX
 bot = TgClient(
-    name="bot",
+    name=":memory:",
     api_id=TELEGRAM_API,
     api_hash=TELEGRAM_HASH,
     bot_token=BOT_TOKEN,
     workers=1000,
-    parse_mode=enums.ParseMode.HTML
+    parse_mode=enums.ParseMode.HTML,
+    in_memory=True
 ).start()
 
 LOGGER.info("Telegram bot client started successfully")

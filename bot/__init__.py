@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Memory session + shared dictionaries fix - COMPLETE SOLUTION
+# Memory session + shared dictionaries (user_data, rss_dict, qbit_options) fix
 
-from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
-from aioshutil import rmtree as aiormtree
-from asyncio import create_subprocess_exec, create_subprocess_shell, run_coroutine_threadsafe, sleep
+import asyncio
 from asyncio.subprocess import PIPE
-from dotenv import load_dotenv
-from functools import partial
-from logging import getLogger, StreamHandler, basicConfig, INFO, WARNING
-from os import environ, path as ospath, remove as osremove
-from pyrogram import Client as TgClient, enums
-from subprocess import run as srun, check_output
 from threading import Thread
 from time import time
+from functools import partial
+from os import environ, path as ospath, remove as osremove
+from subprocess import run as srun, check_output
+from logging import getLogger, StreamHandler, basicConfig, INFO
+from dotenv import load_dotenv
 from uvloop import install
+from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
+from aioshutil import rmtree as aiormtree
+from pyrogram import Client as TgClient, enums
 from requests import get
 
-# Load environment variables
+# Load and apply environment variables
 load_dotenv('config.env', override=True)
-
-# Install uvloop for better performance
 install()
 
 # Logging setup
@@ -30,7 +28,6 @@ basicConfig(
     level=INFO
 )
 LOGGER = getLogger(__name__)
-
 LOGGER.info("Loading configuration from environment variables...")
 
 # Essential bot variables
@@ -42,7 +39,7 @@ DATABASE_URL = environ.get('DATABASE_URL', '')
 AUTHORIZED_CHATS = environ.get('AUTHORIZED_CHATS', '')
 SUDO_USERS = environ.get('SUDO_USERS', '')
 
-# Koyeb optimized settings
+# Koyeb-optimized settings
 STATUS_UPDATE_INTERVAL = int(environ.get('STATUS_UPDATE_INTERVAL', '10'))
 STATUS_LIMIT = int(environ.get('STATUS_LIMIT', '4'))
 QUEUE_ALL = int(environ.get('QUEUE_ALL', '2'))
@@ -61,26 +58,26 @@ CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
 
 LOGGER.info("Environment variables loaded successfully")
 
-# Shared data structures
+# Shared data structures for modules
 user_data = {}
 rss_dict = {}
 qbit_options = {}
 
 # Validate essential variables
 if not BOT_TOKEN:
-    LOGGER.error("BOT_TOKEN not found in environment variables!")
+    LOGGER.error("BOT_TOKEN not set!")
     exit(1)
 if not OWNER_ID:
-    LOGGER.error("OWNER_ID not found in environment variables!")
+    LOGGER.error("OWNER_ID not set!")
     exit(1)
 if not TELEGRAM_API:
-    LOGGER.error("TELEGRAM_API not found in environment variables!")
+    LOGGER.error("TELEGRAM_API not set!")
     exit(1)
 if not TELEGRAM_HASH:
-    LOGGER.error("TELEGRAM_HASH not found in environment variables!")
+    LOGGER.error("TELEGRAM_HASH not set!")
     exit(1)
 
-# Bot client instance - memory session fix
+# Initialize bot client with in-memory session to avoid SQLite locks
 bot = TgClient(
     name=":memory:",
     api_id=TELEGRAM_API,
@@ -93,7 +90,7 @@ bot = TgClient(
 
 LOGGER.info("Telegram bot client started successfully")
 
-# Essential imports for mirror/leech functionality
+# Essential imports for functionality
 from .helper.ext_utils.db_handler import DbManager
 from .helper.ext_utils.bot_utils import sync_to_async, new_task
 from .helper.telegram_helper.bot_commands import BotCommands
@@ -101,19 +98,19 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, dele
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 
-# Import only essential modules
+# Core modules
 from .modules import authorize, bot_settings, cancel_mirror, mirror_leech, status, users_settings
 
-# Essential bot info
+# Bot metadata
 VERSION = "Koyeb Optimized v1.0"
 LOGGER.info(f"Bot Version: {VERSION}")
-LOGGER.info("Koyeb Optimized Mirror/Leech Bot Started Successfully!")
+LOGGER.info("Koyeb Optimized Mirror/Leech Bot Initialized!")
 
-# Database initialization
+# Database connection
 if DATABASE_URL:
     DbManager()
-    LOGGER.info("Database connected successfully")
+    LOGGER.info("Connected to database successfully")
 else:
-    LOGGER.warning("No database URL provided—bot will operate without database")
+    LOGGER.warning("No DATABASE_URL provided; running without DB")
 
 LOGGER.info("=== BOT INITIALIZATION COMPLETE ===")

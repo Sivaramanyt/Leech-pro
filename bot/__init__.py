@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Memory session fix - NO database conflicts
+# Memory session + user_data fix - COMPLETE SOLUTION
 
 from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
 from aioshutil import rmtree as aiormtree
@@ -57,6 +57,9 @@ UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', 'master')
 CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
 
 LOGGER.info("Environment variables loaded successfully")
+
+# User data dictionary for bot functionality - ESSENTIAL EXPORT
+user_data = {}
 
 # Validate essential variables
 if not BOT_TOKEN:

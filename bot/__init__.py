@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Memory session + user_data + rss_dict fix - COMPLETE SOLUTION
+# Memory session + shared dictionaries fix - COMPLETE SOLUTION
 
 from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
 from aioshutil import rmtree as aiormtree
@@ -8,8 +8,8 @@ from asyncio import create_subprocess_exec, create_subprocess_shell, run_corouti
 from asyncio.subprocess import PIPE
 from dotenv import load_dotenv
 from functools import partial
-from logging import getLogger, FileHandler, StreamHandler, INFO, basicConfig, ERROR, WARNING
-from os import environ, getcwd, path as ospath, remove as osremove
+from logging import getLogger, StreamHandler, basicConfig, INFO, WARNING
+from os import environ, path as ospath, remove as osremove
 from pyrogram import Client as TgClient, enums
 from subprocess import run as srun, check_output
 from threading import Thread
@@ -61,9 +61,10 @@ CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
 
 LOGGER.info("Environment variables loaded successfully")
 
-# Data structures for use across modules
+# Shared data structures
 user_data = {}
 rss_dict = {}
+qbit_options = {}
 
 # Validate essential variables
 if not BOT_TOKEN:
@@ -79,7 +80,7 @@ if not TELEGRAM_HASH:
     LOGGER.error("TELEGRAM_HASH not found in environment variables!")
     exit(1)
 
-# Bot client instance - MEMORY SESSION FIX
+# Bot client instance - memory session fix
 bot = TgClient(
     name=":memory:",
     api_id=TELEGRAM_API,
@@ -100,7 +101,7 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, dele
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 
-# Import only essential modules (removed problematic imports)
+# Import only essential modules
 from .modules import authorize, bot_settings, cancel_mirror, mirror_leech, status, users_settings
 
 # Essential bot info
@@ -113,7 +114,6 @@ if DATABASE_URL:
     DbManager()
     LOGGER.info("Database connected successfully")
 else:
-    LOGGER.warning("No database URL provided – bot will operate without database")
+    LOGGER.warning("No database URL provided—bot will operate without database")
 
 LOGGER.info("=== BOT INITIALIZATION COMPLETE ===")
-    

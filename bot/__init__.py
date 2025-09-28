@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Memory session + user_data fix - COMPLETE SOLUTION
+# Memory session + user_data + rss_dict fix - COMPLETE SOLUTION
 
 from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
 from aioshutil import rmtree as aiormtree
@@ -24,13 +24,16 @@ load_dotenv('config.env', override=True)
 install()
 
 # Logging setup
-basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[StreamHandler()], level=INFO)
+basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[StreamHandler()],
+    level=INFO
+)
 LOGGER = getLogger(__name__)
 
-# Direct environment variable loading - NO config file imports
 LOGGER.info("Loading configuration from environment variables...")
 
-# Essential bot variables - MUST BE EXPORTED
+# Essential bot variables
 BOT_TOKEN = environ.get('BOT_TOKEN', '')
 OWNER_ID = int(environ.get('OWNER_ID', '0'))
 TELEGRAM_API = int(environ.get('TELEGRAM_API', '0'))
@@ -58,22 +61,20 @@ CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
 
 LOGGER.info("Environment variables loaded successfully")
 
-# User data dictionary for bot functionality - ESSENTIAL EXPORT
+# Data structures for use across modules
 user_data = {}
+rss_dict = {}
 
 # Validate essential variables
 if not BOT_TOKEN:
     LOGGER.error("BOT_TOKEN not found in environment variables!")
     exit(1)
-
 if not OWNER_ID:
     LOGGER.error("OWNER_ID not found in environment variables!")
     exit(1)
-
 if not TELEGRAM_API:
     LOGGER.error("TELEGRAM_API not found in environment variables!")
     exit(1)
-
 if not TELEGRAM_HASH:
     LOGGER.error("TELEGRAM_HASH not found in environment variables!")
     exit(1)
@@ -112,6 +113,7 @@ if DATABASE_URL:
     DbManager()
     LOGGER.info("Database connected successfully")
 else:
-    LOGGER.warning("No database URL provided - bot will work without database")
+    LOGGER.warning("No database URL provided – bot will operate without database")
 
 LOGGER.info("=== BOT INITIALIZATION COMPLETE ===")
+    

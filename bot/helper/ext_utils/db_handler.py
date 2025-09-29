@@ -1,7 +1,7 @@
 from aiofiles import open as aiopen
 from aiofiles.os import path as aiopath
 from importlib import import_module
-from pymongo import AsyncMongoClient
+from motor.motor_asyncio import AsyncIOMotorClient as AsyncMongoClient
 from pymongo.server_api import ServerApi
 from pymongo.errors import PyMongoError
 
@@ -9,8 +9,8 @@ from ... import LOGGER, user_data, rss_dict, qbit_options
 from ...core.mltb_client import TgClient
 from ...core.config_manager import Config
 
-
 class DbManager:
+
     def __init__(self):
         self._return = True
         self._conn = None
@@ -213,5 +213,5 @@ class DbManager:
             return
         await self.db[name][TgClient.ID].drop()
 
-
 database = DbManager()
+    

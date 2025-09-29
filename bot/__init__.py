@@ -62,6 +62,7 @@ LOGGER.info("Environment variables loaded successfully")
 user_data = {}
 rss_dict = {}
 qbit_options = {}
+bot_loop = None
 
 # Validate essential variables
 if not BOT_TOKEN:

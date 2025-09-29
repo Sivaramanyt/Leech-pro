@@ -1,93 +1,64 @@
 #!/usr/bin/env python3
-import asyncio
-from asyncio.subprocess import PIPE
-from threading import Thread
-from time import time
-from functools import partial
-from os import environ, path as ospath, remove as osremove
-from subprocess import run as srun, check_output
-from logging import getLogger, StreamHandler, basicConfig, INFO
+import uuid, time, logging
+from os import environ
 from dotenv import load_dotenv
-from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
-from aioshutil import rmtree as aiormtree
 from pyrogram import Client as TgClient, enums
-from requests import get
 
-# Load environment variables
-load_dotenv('config.env', override=True)
+# -------- 1. Load .env --------
+load_dotenv("config.env", override=True)
 
-# Logging setup
-basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[StreamHandler()],
-    level=INFO
+# -------- 2. Logging --------
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    level=logging.INFO
 )
-LOGGER = getLogger(__name__)
-LOGGER.info("Loading configuration from environment variables...")
+LOGGER = logging.getLogger("MLTB")
 
-# Essential bot variables
-BOT_TOKEN = environ.get('BOT_TOKEN', '')
-OWNER_ID = int(environ.get('OWNER_ID', '0'))
-TELEGRAM_API = int(environ.get('TELEGRAM_API', '0'))
-TELEGRAM_HASH = environ.get('TELEGRAM_HASH', '')
-DATABASE_URL = environ.get('DATABASE_URL', '')
-AUTHORIZED_CHATS = environ.get('AUTHORIZED_CHATS', '')
-SUDO_USERS = environ.get('SUDO_USERS', '')
+# -------- 3. Mandatory ENV --------
+BOT_TOKEN     = environ.get("BOT_TOKEN", "")
+OWNER_ID      = int(environ.get("OWNER_ID", "0"))
+TELEGRAM_API  = int(environ.get("TELEGRAM_API", "0"))
+TELEGRAM_HASH = environ.get("TELEGRAM_HASH", "")
 
-# Settings
-STATUS_UPDATE_INTERVAL = int(environ.get('STATUS_UPDATE_INTERVAL', '10'))
-STATUS_LIMIT = int(environ.get('STATUS_LIMIT', '4'))
-QUEUE_ALL = int(environ.get('QUEUE_ALL', '2'))
-QUEUE_DOWNLOAD = int(environ.get('QUEUE_DOWNLOAD', '1'))
-QUEUE_UPLOAD = int(environ.get('QUEUE_UPLOAD', '1'))
-LEECH_SPLIT_SIZE = int(environ.get('LEECH_SPLIT_SIZE', '1073741824'))
-AS_DOCUMENT = environ.get('AS_DOCUMENT', 'False').lower() == 'true'
-DEFAULT_UPLOAD = environ.get('DEFAULT_UPLOAD', 'tg')
-EXCLUDED_EXTENSIONS = environ.get('EXCLUDED_EXTENSIONS', '')
-INCOMPLETE_TASK_NOTIFIER = environ.get('INCOMPLETE_TASK_NOTIFIER', 'False').lower() == 'true'
-UPSTREAM_REPO = environ.get('UPSTREAM_REPO', '')
-UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', 'master')
-CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
+if not all([BOT_TOKEN, OWNER_ID, TELEGRAM_API, TELEGRAM_HASH]):
+    LOGGER.error("❌ Missing required environment variables!")
+    raise SystemExit
 
-LOGGER.info("Environment variables loaded successfully")
-
-# Shared data structures
-user_data = {}
-rss_dict = {}
-qbit_options = {}
-bot_loop = None
+# -------- 4. Shared Dicts --------
+user_data   = {}
+rss_dict    = {}
+qbit_options= {}
 status_dict = {}
+bot_loop    = None
 
-# Validate essential variables
-if not BOT_TOKEN or not OWNER_ID or not TELEGRAM_API or not TELEGRAM_HASH:
-    LOGGER.error("Essential variables not set!")
-    exit(1)
+# -------- 5. Unique session filename (avoids sqlite lock) --------
+session_name = f"koyeb_{int(time.time())}_{uuid.uuid4().hex[:6]}"
 
-# Initialize bot client with session fix
+# -------- 6. Start Bot --------
+LOGGER.info("🚀 Starting Telegram bot …")
 bot = TgClient(
-    name="bot_session", 
+    name=session_name,          # unique sqlite file
     api_id=TELEGRAM_API,
     api_hash=TELEGRAM_HASH,
     bot_token=BOT_TOKEN,
     workers=100,
     parse_mode=enums.ParseMode.HTML
 ).start()
+LOGGER.info("✅ Bot connected to Telegram")
 
-LOGGER.info("Telegram bot client started successfully")
-
-# Initialize database if URL provided
+# -------- 7. Optional: connect MongoDB --------
+DATABASE_URL = environ.get("DATABASE_URL", "")
 if DATABASE_URL:
     from .helper.ext_utils.db_handler import DbManager
     DbManager()
-    LOGGER.info("Connected to database successfully")
+    LOGGER.info("✅ Connected to MongoDB")
 
-# Essential bot commands and filters
-from .helper.telegram_helper.bot_commands import BotCommands
-from .helper.telegram_helper.message_utils import sendMessage, editMessage, deleteMessage
-from .helper.telegram_helper.filters import CustomFilters
-from .helper.telegram_helper.button_build import ButtonMaker
-
-# Core modules
+# -------- 8. Import core modules --------
+from .helper.telegram_helper.bot_commands   import BotCommands
+from .helper.telegram_helper.message_utils  import sendMessage, editMessage, deleteMessage
+from .helper.telegram_helper.filters        import CustomFilters
+from .helper.telegram_helper.button_build   import ButtonMaker
 from .modules import authorize, bot_settings, cancel_mirror, mirror_leech, status, users_settings
 
-LOGGER.info("=== KOYEB MIRROR/LEECH BOT READY ===")
+LOGGER.info("🎉 Mirror/Leech/Terabox bot is LIVE!")
+    

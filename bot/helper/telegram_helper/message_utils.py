@@ -1,5 +1,5 @@
 from asyncio import sleep
-from pyrogram.errors import FloodWait, FloodPremiumWait
+from pyrogram.errors import FloodWait
 from re import match as re_match
 from time import time
 

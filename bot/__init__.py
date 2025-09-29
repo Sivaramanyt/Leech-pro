@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-# Memory session + shared dictionaries (user_data, rss_dict, qbit_options) fix
 
 import asyncio
 from asyncio.subprocess import PIPE
@@ -11,15 +10,19 @@ from os import environ, path as ospath, remove as osremove
 from subprocess import run as srun, check_output
 from logging import getLogger, StreamHandler, basicConfig, INFO
 from dotenv import load_dotenv
-from uvloop import install
 from aiofiles.os import path as aiopath, remove as aioremove, rename as aiorename, makedirs
 from aioshutil import rmtree as aiormtree
 from pyrogram import Client as TgClient, enums
 from requests import get
 
+try:
+    from uvloop import install
+    install()
+except ImportError:
+    pass
+
 # Load and apply environment variables
 load_dotenv('config.env', override=True)
-install()
 
 # Logging setup
 basicConfig(
@@ -78,7 +81,7 @@ if not TELEGRAM_HASH:
     LOGGER.error("TELEGRAM_HASH not set!")
     exit(1)
 
-# Initialize bot client with in-memory session to avoid SQLite locks
+# Initialize bot client with in-memory session
 bot = TgClient(
     name=":memory:",
     api_id=TELEGRAM_API,

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# KOYEB FINAL __init__.py - Mirror/Leech/Terabox Bot
-
 import asyncio
 from asyncio.subprocess import PIPE
 from threading import Thread
@@ -15,13 +13,7 @@ from aioshutil import rmtree as aiormtree
 from pyrogram import Client as TgClient, enums
 from requests import get
 
-try:
-    from uvloop import install
-    install()
-except ImportError:
-    pass
-
-# Load and apply environment variables
+# Load environment variables
 load_dotenv('config.env', override=True)
 
 # Logging setup
@@ -42,7 +34,7 @@ DATABASE_URL = environ.get('DATABASE_URL', '')
 AUTHORIZED_CHATS = environ.get('AUTHORIZED_CHATS', '')
 SUDO_USERS = environ.get('SUDO_USERS', '')
 
-# Koyeb-optimized settings
+# Settings
 STATUS_UPDATE_INTERVAL = int(environ.get('STATUS_UPDATE_INTERVAL', '10'))
 STATUS_LIMIT = int(environ.get('STATUS_LIMIT', '4'))
 QUEUE_ALL = int(environ.get('QUEUE_ALL', '2'))
@@ -51,8 +43,6 @@ QUEUE_UPLOAD = int(environ.get('QUEUE_UPLOAD', '1'))
 LEECH_SPLIT_SIZE = int(environ.get('LEECH_SPLIT_SIZE', '1073741824'))
 AS_DOCUMENT = environ.get('AS_DOCUMENT', 'False').lower() == 'true'
 DEFAULT_UPLOAD = environ.get('DEFAULT_UPLOAD', 'tg')
-
-# Optional settings
 EXCLUDED_EXTENSIONS = environ.get('EXCLUDED_EXTENSIONS', '')
 INCOMPLETE_TASK_NOTIFIER = environ.get('INCOMPLETE_TASK_NOTIFIER', 'False').lower() == 'true'
 UPSTREAM_REPO = environ.get('UPSTREAM_REPO', '')
@@ -61,27 +51,18 @@ CMD_SUFFIX = environ.get('CMD_SUFFIX', '')
 
 LOGGER.info("Environment variables loaded successfully")
 
-# Shared data structures for modules
+# Shared data structures
 user_data = {}
 rss_dict = {}
 qbit_options = {}
 bot_loop = None
 
 # Validate essential variables
-if not BOT_TOKEN:
-    LOGGER.error("BOT_TOKEN not set!")
-    exit(1)
-if not OWNER_ID:
-    LOGGER.error("OWNER_ID not set!")
-    exit(1)
-if not TELEGRAM_API:
-    LOGGER.error("TELEGRAM_API not set!")
-    exit(1)
-if not TELEGRAM_HASH:
-    LOGGER.error("TELEGRAM_HASH not set!")
+if not BOT_TOKEN or not OWNER_ID or not TELEGRAM_API or not TELEGRAM_HASH:
+    LOGGER.error("Essential variables not set!")
     exit(1)
 
-# Initialize bot client with in-memory session
+# Initialize bot client
 bot = TgClient(
     name=":memory:",
     api_id=TELEGRAM_API,
@@ -94,7 +75,7 @@ bot = TgClient(
 
 LOGGER.info("Telegram bot client started successfully")
 
-# Essential imports for functionality
+# Essential imports
 from .helper.ext_utils.db_handler import DbManager
 from .helper.ext_utils.bot_utils import sync_to_async, new_task
 from .helper.telegram_helper.bot_commands import BotCommands
@@ -105,16 +86,9 @@ from .helper.telegram_helper.button_build import ButtonMaker
 # Core modules
 from .modules import authorize, bot_settings, cancel_mirror, mirror_leech, status, users_settings
 
-# Bot metadata
-VERSION = "Koyeb Optimized v1.0"
-LOGGER.info(f"Bot Version: {VERSION}")
-LOGGER.info("Koyeb Optimized Mirror/Leech Bot Initialized!")
-
-# Database connection
+# Initialize database if URL provided
 if DATABASE_URL:
     DbManager()
     LOGGER.info("Connected to database successfully")
-else:
-    LOGGER.warning("No DATABASE_URL provided; running without DB")
 
-LOGGER.info("=== BOT INITIALIZATION COMPLETE ===")
+LOGGER.info("=== KOYEB MIRROR/LEECH BOT READY ===")

@@ -63,15 +63,14 @@ if not BOT_TOKEN or not OWNER_ID or not TELEGRAM_API or not TELEGRAM_HASH:
     LOGGER.error("Essential variables not set!")
     exit(1)
 
-# Initialize bot client
+# Initialize bot client with session fix
 bot = TgClient(
-    name=":memory:",
+    name="bot_session", 
     api_id=TELEGRAM_API,
     api_hash=TELEGRAM_HASH,
     bot_token=BOT_TOKEN,
-    workers=1000,
-    parse_mode=enums.ParseMode.HTML,
-    in_memory=True
+    workers=100,
+    parse_mode=enums.ParseMode.HTML
 ).start()
 
 LOGGER.info("Telegram bot client started successfully")

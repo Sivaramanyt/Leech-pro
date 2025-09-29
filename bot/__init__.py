@@ -75,9 +75,13 @@ bot = TgClient(
 
 LOGGER.info("Telegram bot client started successfully")
 
-# Essential imports
-from .helper.ext_utils.db_handler import DbManager
-from .helper.ext_utils.bot_utils import sync_to_async, new_task
+# Initialize database if URL provided
+if DATABASE_URL:
+    from .helper.ext_utils.db_handler import DbManager
+    DbManager()
+    LOGGER.info("Connected to database successfully")
+
+# Essential bot commands and filters
 from .helper.telegram_helper.bot_commands import BotCommands
 from .helper.telegram_helper.message_utils import sendMessage, editMessage, deleteMessage
 from .helper.telegram_helper.filters import CustomFilters
@@ -85,10 +89,5 @@ from .helper.telegram_helper.button_build import ButtonMaker
 
 # Core modules
 from .modules import authorize, bot_settings, cancel_mirror, mirror_leech, status, users_settings
-
-# Initialize database if URL provided
-if DATABASE_URL:
-    DbManager()
-    LOGGER.info("Connected to database successfully")
 
 LOGGER.info("=== KOYEB MIRROR/LEECH BOT READY ===")

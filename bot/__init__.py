@@ -56,6 +56,7 @@ user_data = {}
 rss_dict = {}
 qbit_options = {}
 bot_loop = None
+status_dict = {}
 
 # Validate essential variables
 if not BOT_TOKEN or not OWNER_ID or not TELEGRAM_API or not TELEGRAM_HASH:
